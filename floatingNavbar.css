@@ -12,6 +12,7 @@
  * variable isn't available.
  * --wm-floating-navbar-background: var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1));         (the bar itself)
  * --wm-floating-navbar-folder-background: var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1));  (nav folder dropdowns)
+ * --wm-floating-navbar-color: var(--solidHeaderNavigationColor, hsla(var(--black-hsl, 0, 0%, 7%), 1));                 (links, site title, burger)
  * --wm-floating-navbar-shadow: 0 8px 32px hsla(var(--black-hsl, 0, 0%, 0%), 0.1);
  *
  * Sizing & shape (soft, rounded):
@@ -129,23 +130,81 @@ body.wm-floating-navbar-active #header[data-section-theme*="black"] .header-inne
 }
 
 /* ================================
+   NAV COLOR
+   The bar supplies its own background, so it has to supply the matching text
+   color too. An adaptive header sets its nav color for whatever it's sitting
+   over — light type over a dark hero, say — and without this that color
+   carries straight into the bar and disappears against it. The default is
+   Squarespace's own --solidHeaderNavigationColor, which is the color paired
+   with the --solidHeaderBackgroundColor the bar uses as its background, so the
+   two always agree. !important throughout because the header style rules this
+   overrides are themselves specific; override --wm-floating-navbar-color
+   rather than these rules.
+   ================================ */
+
+/* Matched on element rather than class, because the header's interactive text
+   isn't consistently a link: folder titles are a span inside a button, and
+   class names vary by nav type. Anything carrying its own colors is left out —
+   .sqs-button-element covers header CTAs. Scoped to .header-inner, which is
+   the bar itself: panels that render outside it, such as a mega menu, keep
+   their own background and so must keep their own text colors too. */
+body.wm-floating-navbar-active #header .header-inner,
+body.wm-floating-navbar-active #header .header-inner a:not(.sqs-button-element),
+body.wm-floating-navbar-active #header .header-inner button:not(.sqs-button-element),
+body.wm-floating-navbar-active #header .header-inner a:not(.sqs-button-element) span,
+body.wm-floating-navbar-active #header .header-inner button:not(.sqs-button-element) span {
+  color: var(--wm-floating-navbar-color, var(--solidHeaderNavigationColor, hsla(var(--black-hsl, 0, 0%, 7%), 1))) !important;
+}
+
+/* The folder dropdown gets its background from this plugin, so its contents
+   get the matching text color wherever the panel renders. */
+body.wm-floating-navbar-active #header .header-nav-folder-content,
+body.wm-floating-navbar-active #header .header-nav-folder-content a,
+body.wm-floating-navbar-active #header .header-nav-folder-content a span,
+body.wm-floating-navbar-active #header .header-nav-folder-content button,
+body.wm-floating-navbar-active #header .header-nav-folder-content button span {
+  color: var(--wm-floating-navbar-color, var(--solidHeaderNavigationColor, hsla(var(--black-hsl, 0, 0%, 7%), 1))) !important;
+}
+
+/* The burger bars are painted with background-color rather than color, so they
+   don't inherit from the rule above. */
+body.wm-floating-navbar-active #header .top-bun,
+body.wm-floating-navbar-active #header .patty,
+body.wm-floating-navbar-active #header .bottom-bun {
+  background-color: var(--wm-floating-navbar-color, var(--solidHeaderNavigationColor, hsla(var(--black-hsl, 0, 0%, 7%), 1))) !important;
+}
+
+/* ================================
    NATIVE HEADER CHROME
    The full-width background, border and drop shadow are hidden so only the
    bar reads as the header.
    ================================ */
 
-body.wm-floating-navbar-active #header .header-background {
-  opacity: 0;
+/* Each header style paints its background on its own layer element, named for
+   the style: .header-background-solid, .header-background-gradient, and so on.
+   Matching on the class prefix covers all of them, including any Squarespace
+   adds later, without needing to know which style the site is using. The
+   mobile overlay's own background (.header-menu-bg) deliberately doesn't match
+   these — it has to stay opaque for the open menu.
+   .header-inner is absent too: that's the bar itself, styled further down. */
+body.wm-floating-navbar-active #header,
+body.wm-floating-navbar-active #header .header-announcement-bar-wrapper,
+body.wm-floating-navbar-active #header [class*="header-background"],
+body.wm-floating-navbar-active #header [class*="header-blur"] {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+body.wm-floating-navbar-active #header [class*="header-background"],
+body.wm-floating-navbar-active #header [class*="header-blur"] {
+  opacity: 0 !important;
 }
 
 body.wm-floating-navbar-active #header .header-border,
 body.wm-floating-navbar-active #header .header-dropshadow {
   display: none;
-}
-
-body.wm-floating-navbar-active [data-header-style="theme"].header,
-body.wm-floating-navbar-active [data-header-style="dynamic"].header {
-  background: transparent;
 }
 
 /* ================================

@@ -96,7 +96,7 @@ class WMFloatingNavbar {
 
     // Both of these have to be read before any plugin class lands on the
     // body, while the header is still exactly as Squarespace rendered it.
-    this.headerWasPinned = this.detectHeaderPinned();
+    this.headerIsInFlow = this.detectHeaderInFlow();
     this.naturalHeaderHeight = this.header.offsetHeight;
     this.contentContainer = this.resolveContentContainer();
 
@@ -164,9 +164,14 @@ class WMFloatingNavbar {
      header's height. That gap gets reserved on the content container instead.
      ================================ */
 
-  detectHeaderPinned() {
+  /* Only a header that actually occupies space in the page flow leaves a gap
+     behind when the plugin pins it. static, relative and sticky all take up
+     space; absolute and fixed do not. Squarespace's adaptive and transparent
+     headers are absolutely positioned, so reserving space for one of those
+     adds padding the page never lost in the first place. */
+  detectHeaderInFlow() {
     const position = window.getComputedStyle(this.header).position;
-    return position === 'fixed' || position === 'sticky';
+    return position !== 'absolute' && position !== 'fixed';
   }
 
   resolveContentContainer() {
@@ -180,13 +185,13 @@ class WMFloatingNavbar {
     return null;
   }
 
-  /* Only needed when the plugin is the thing doing the pinning. A header
-     Squarespace already pins is already accounted for in its own layout, and
-     "top" position never leaves the flow at all. */
+  /* Only needed when the plugin is the thing taking the header out of the
+     flow. A header Squarespace already positions out of flow is accounted for
+     in its own layout, and "top" position never leaves the flow at all. */
   reservesSpace() {
     return (
       this.settings.position === 'fixed' &&
-      !this.headerWasPinned &&
+      this.headerIsInFlow &&
       !!this.contentContainer
     );
   }
