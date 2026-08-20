@@ -1,0 +1,174 @@
+/**
+ * Floating Navbar Plugin for Squarespace
+ * Copyright Will-Myers.com
+ **/
+
+/* Custom Property Reference
+ *
+ * Colors: by default the bar and its folder dropdowns inherit Squarespace's own
+ * header background (--solidHeaderBackgroundColor), so the floating navbar
+ * matches the site header and follows the header's section theme. Each one
+ * falls back to an editable backup value for the rare case where that theme
+ * variable isn't available.
+ * --wm-floating-navbar-background: var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1));         (the bar itself)
+ * --wm-floating-navbar-folder-background: var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1));  (nav folder dropdowns)
+ * --wm-floating-navbar-shadow: 0 8px 32px hsla(var(--black-hsl, 0, 0%, 0%), 0.1);
+ *
+ * Sizing & shape (soft, rounded):
+ * --wm-floating-navbar-width: 76vw;                                (width of the bar)
+ * --wm-floating-navbar-max-width: none;                            (optional upper bound on that width)
+ * --wm-floating-navbar-offset: 20px;                               (gap above and below the bar)
+ * --wm-floating-navbar-padding: 0.75rem 2.5rem;                    (inside the bar)
+ * --wm-floating-navbar-radius: 20px;
+ * --wm-floating-navbar-folder-radius: 12px;
+ * --wm-floating-navbar-blur: 12px;                                 (backdrop blur behind the bar)
+ * --wm-floating-navbar-transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+ * --wm-floating-navbar-z: 9999;
+ *
+ * Mobile overrides (767px and below):
+ * --wm-floating-navbar-width-mobile: 90vw;
+ * --wm-floating-navbar-offset-mobile: 12px;
+ * --wm-floating-navbar-padding-mobile: 0.5rem 1.25rem;
+ */
+
+/* ================================
+   TRANSITIONS
+   `wm-floating-navbar` is added to <body> once the plugin takes ownership of
+   the header, so nothing below applies until the script has initialized.
+   ================================ */
+
+body.wm-floating-navbar #header .header-announcement-bar-wrapper,
+body.wm-floating-navbar #header .header-inner {
+  transition: all var(--wm-floating-navbar-transition, 0.5s cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+/* Held for the first two frames after init so "auto" display doesn't animate
+   the bar into place on page load. */
+body.wm-floating-navbar-no-transition #header .header-announcement-bar-wrapper,
+body.wm-floating-navbar-no-transition #header .header-inner {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.wm-floating-navbar #header .header-announcement-bar-wrapper,
+  body.wm-floating-navbar #header .header-inner {
+    transition: none;
+  }
+}
+
+/* ================================
+   THE FLOATING BAR
+   `wm-floating-navbar-active` is toggled on scroll, or set once on load when
+   the display setting is "auto".
+   ================================ */
+
+body.wm-floating-navbar-active #header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--wm-floating-navbar-z, 9999);
+}
+
+body.wm-floating-navbar-active #header .header-announcement-bar-wrapper {
+  padding: var(--wm-floating-navbar-offset, 20px) 0;
+  display: flex;
+  justify-content: center;
+}
+
+body.wm-floating-navbar-active #header .header-inner {
+  width: var(--wm-floating-navbar-width, 76vw);
+  max-width: var(--wm-floating-navbar-max-width, none);
+  background: var(--wm-floating-navbar-background, var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1))) !important;
+  backdrop-filter: blur(var(--wm-floating-navbar-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--wm-floating-navbar-blur, 12px));
+  border-radius: var(--wm-floating-navbar-radius, 20px);
+  padding: var(--wm-floating-navbar-padding, 0.75rem 2.5rem) !important;
+  box-shadow: var(--wm-floating-navbar-shadow, 0 8px 32px hsla(var(--black-hsl, 0, 0%, 0%), 0.1));
+}
+
+/* Dark and black header themes ship their own higher-specificity background,
+   so the bar color is restated here to keep the same custom property winning. */
+body.wm-floating-navbar-active #header[data-section-theme*="dark"] .header-inner,
+body.wm-floating-navbar-active #header[data-section-theme*="black"] .header-inner {
+  background: var(--wm-floating-navbar-background, var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1))) !important;
+}
+
+/* ================================
+   NATIVE HEADER CHROME
+   The full-width background, border and drop shadow are hidden so only the
+   bar reads as the header.
+   ================================ */
+
+body.wm-floating-navbar-active #header .header-background {
+  opacity: 0;
+}
+
+body.wm-floating-navbar-active #header .header-border,
+body.wm-floating-navbar-active #header .header-dropshadow {
+  display: none;
+}
+
+body.wm-floating-navbar-active [data-header-style="theme"].header,
+body.wm-floating-navbar-active [data-header-style="dynamic"].header {
+  background: transparent;
+}
+
+/* ================================
+   NAV FOLDER DROPDOWNS
+   ================================ */
+
+body.wm-floating-navbar-active .header-nav-folder-content {
+  background: var(--wm-floating-navbar-folder-background, var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1))) !important;
+  backdrop-filter: blur(var(--wm-floating-navbar-blur, 12px));
+  -webkit-backdrop-filter: blur(var(--wm-floating-navbar-blur, 12px));
+  border-radius: var(--wm-floating-navbar-folder-radius, 12px);
+}
+
+/* ================================
+   MOBILE MENU
+   While the burger overlay is open the bar stands down so the full-screen
+   menu isn't framed inside a pill.
+   ================================ */
+
+body.wm-floating-navbar-active #header.header--menu-open .header-announcement-bar-wrapper {
+  padding: 0;
+  display: block;
+}
+
+body.wm-floating-navbar-active #header.header--menu-open .header-inner {
+  width: 100%;
+  max-width: none;
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ================================
+   MOBILE OVERRIDES
+   ================================ */
+
+@media (max-width: 767px) {
+  body.wm-floating-navbar-active #header .header-announcement-bar-wrapper {
+    padding: var(--wm-floating-navbar-offset-mobile, 12px) 0;
+  }
+
+  body.wm-floating-navbar-active #header .header-inner {
+    width: var(--wm-floating-navbar-width-mobile, 90vw);
+    padding: var(--wm-floating-navbar-padding-mobile, 0.5rem 1.25rem) !important;
+  }
+}
+
+/* ================================
+   EDIT MODE
+   The script never initializes inside the Squarespace editor, so the header
+   stays exactly as Squarespace renders it while a page is being edited. This
+   rule is a belt-and-braces reset in case a class is left behind.
+   ================================ */
+
+body.sqs-edit-mode-active.wm-floating-navbar-active #header {
+  position: relative;
+  z-index: auto;
+}
