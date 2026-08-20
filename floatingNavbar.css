@@ -24,9 +24,14 @@
  * --wm-floating-navbar-blur: 12px;                                 (backdrop blur behind the bar)
  * --wm-floating-navbar-transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
  * --wm-floating-navbar-z: 9999;
+ * --wm-floating-navbar-top-offset: 0px;   (nudge the pinned header down, e.g. to clear an announcement bar)
+ *
+ * Set by the script, not for editing — the height the header gave up when it
+ * was pinned, handed to the content so nothing jumps:
+ * --wm-floating-navbar-header-height
  *
  * Mobile overrides (767px and below):
- * --wm-floating-navbar-width-mobile: 90vw;
+ * --wm-floating-navbar-width-mobile: 86vw;
  * --wm-floating-navbar-offset-mobile: 12px;
  * --wm-floating-navbar-padding-mobile: 0.5rem 1.25rem;
  */
@@ -57,18 +62,47 @@ body.wm-floating-navbar-no-transition #header .header-inner {
 }
 
 /* ================================
-   THE FLOATING BAR
-   `wm-floating-navbar-active` is toggled on scroll, or set once on load when
-   the display setting is "auto".
+   HEADER POSITION
+   Set once at init from the position setting, and deliberately NOT tied to the
+   scrolled state: the plugin owns the header's position for the whole page so
+   Squarespace's own header position setting makes no difference either way.
+   Only the bar's appearance is toggled by `wm-floating-navbar-active`.
    ================================ */
 
-body.wm-floating-navbar-active #header {
+/* Fixed position: the header is pinned from the moment the page loads and
+   stays with the visitor the whole way down, whatever Squarespace was doing
+   with it before. */
+body.wm-floating-navbar.wm-floating-navbar-fixed #header {
   position: fixed;
-  top: 0;
+  top: var(--wm-floating-navbar-top-offset, 0px);
   left: 0;
   right: 0;
   z-index: var(--wm-floating-navbar-z, 9999);
 }
+
+/* Top position: the header is held in the page flow and scrolls away with the
+   content, releasing any pinning Squarespace applies. */
+body.wm-floating-navbar.wm-floating-navbar-top #header {
+  position: relative !important;
+  top: auto;
+  z-index: var(--wm-floating-navbar-z, 9999);
+}
+
+/* A pinned header is out of the page flow, so the space it would have taken
+   up is handed to the content instead and nothing sits underneath it. Applied
+   from load rather than on scroll, so the flow never changes mid-page and
+   there is nothing to jump. The height is measured and written to
+   --wm-floating-navbar-header-height by the script; the class and the target
+   are only set when Squarespace wasn't already pinning the header itself. */
+body.wm-floating-navbar.wm-floating-navbar-reserve-space [data-wm-floating-navbar-spacer] {
+  padding-top: var(--wm-floating-navbar-header-height, var(--header-height, 0px));
+}
+
+/* ================================
+   THE FLOATING BAR
+   `wm-floating-navbar-active` is toggled on scroll, or set once on load when
+   the display setting is "auto".
+   ================================ */
 
 body.wm-floating-navbar-active #header .header-announcement-bar-wrapper {
   padding: var(--wm-floating-navbar-offset, 20px) 0;
@@ -127,23 +161,29 @@ body.wm-floating-navbar-active .header-nav-folder-content {
 
 /* ================================
    MOBILE MENU
-   While the burger overlay is open the bar stands down so the full-screen
-   menu isn't framed inside a pill.
+   The bar is stood down by the script for as long as the burger overlay is
+   open — the active class comes off, so the header reverts to Squarespace's
+   own styling and its own padding, rather than the plugin trying to guess at
+   values to override back. Only two things are left to handle here.
    ================================ */
 
-body.wm-floating-navbar-active #header.header--menu-open .header-announcement-bar-wrapper {
-  padding: 0;
-  display: block;
+/* Without this the pill spends half a second unwinding underneath the overlay
+   as it opens. */
+body.wm-floating-navbar #header.header--menu-open .header-announcement-bar-wrapper,
+body.wm-floating-navbar #header.header--menu-open .header-inner,
+body.wm-floating-navbar.header--menu-open #header .header-announcement-bar-wrapper,
+body.wm-floating-navbar.header--menu-open #header .header-inner {
+  transition: none;
 }
 
-body.wm-floating-navbar-active #header.header--menu-open .header-inner {
-  width: 100%;
-  max-width: none;
-  background: transparent !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-radius: 0;
-  box-shadow: none;
+/* In "top" position the header is deliberately left unpinned, but an open
+   overlay needs it pinned again so the close button can't scroll away. */
+body.wm-floating-navbar.wm-floating-navbar-top #header.header--menu-open,
+body.wm-floating-navbar.wm-floating-navbar-top.header--menu-open #header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
 }
 
 /* ================================
@@ -156,7 +196,7 @@ body.wm-floating-navbar-active #header.header--menu-open .header-inner {
   }
 
   body.wm-floating-navbar-active #header .header-inner {
-    width: var(--wm-floating-navbar-width-mobile, 90vw);
+    width: var(--wm-floating-navbar-width-mobile, 86vw);
     padding: var(--wm-floating-navbar-padding-mobile, 0.5rem 1.25rem) !important;
   }
 }
