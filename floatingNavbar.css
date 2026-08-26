@@ -16,11 +16,10 @@
  * --wm-floating-navbar-shadow: 0 8px 32px hsla(var(--black-hsl, 0, 0%, 0%), 0.1);
  *
  * Sizing & shape (soft, rounded):
- * By default the bar matches the width of the site's own content: the site
- * width less its gutters, capped at the site's max width. Both variables are
- * Squarespace's own, so the bar stays aligned with the page as those change.
- * --wm-floating-navbar-width: calc(100% - (var(--sqs-site-gutter, 3vw) * 2));  (width of the bar)
- * --wm-floating-navbar-max-width: var(--sqs-site-max-width, 1500px);           (upper bound on that width)
+ * The bar is sized as a share of the viewport, then capped at the site's own
+ * max width so it never runs wider than the content below it.
+ * --wm-floating-navbar-width: 76vw;                                (width of the bar)
+ * --wm-floating-navbar-max-width: var(--sqs-site-max-width, 1500px);  (upper bound on that width)
  * --wm-floating-navbar-offset: 20px;                               (gap above and below the bar)
  * --wm-floating-navbar-padding: 0.75rem 2.5rem;                    (inside the bar)
  * --wm-floating-navbar-radius: 20px;
@@ -34,9 +33,8 @@
  * was pinned, handed to the content so nothing jumps:
  * --wm-floating-navbar-header-height
  *
- * Mobile overrides (767px and below). There is no width override: the bar
- * tracks the site's content width at every breakpoint, because the gutter it
- * subtracts is Squarespace's own and changes with the viewport.
+ * Mobile overrides (767px and below):
+ * --wm-floating-navbar-width-mobile: 86vw;
  * --wm-floating-navbar-offset-mobile: 12px;
  * --wm-floating-navbar-padding-mobile: 0.5rem 1.25rem;
  */
@@ -116,7 +114,7 @@ body.wm-floating-navbar-active #header .header-announcement-bar-wrapper {
 }
 
 body.wm-floating-navbar-active #header .header-inner {
-  width: var(--wm-floating-navbar-width, calc(100% - (var(--sqs-site-gutter, 3vw) * 2)));
+  width: var(--wm-floating-navbar-width, 76vw);
   max-width: var(--wm-floating-navbar-max-width, var(--sqs-site-max-width, 1500px));
   background: var(--wm-floating-navbar-background, var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1))) !important;
   backdrop-filter: blur(var(--wm-floating-navbar-blur, 12px));
@@ -258,10 +256,10 @@ body.wm-floating-navbar.wm-floating-navbar-top.header--menu-open #header {
     padding: var(--wm-floating-navbar-offset-mobile, 12px) 0;
   }
 
-  /* No width override here on purpose. The bar's width is driven by
-     --sqs-site-gutter, which Squarespace itself changes at this breakpoint, so
-     the single rule above already matches the site's content width on mobile. */
+  /* A wider share of the viewport than desktop, so the bar isn't pinched on a
+     narrow screen. The max-width cap from the desktop rule still applies. */
   body.wm-floating-navbar-active #header .header-inner {
+    width: var(--wm-floating-navbar-width-mobile, 86vw);
     padding: var(--wm-floating-navbar-padding-mobile, 0.5rem 1.25rem) !important;
   }
 }
