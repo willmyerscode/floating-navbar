@@ -113,6 +113,13 @@ body.wm-floating-navbar-active #header .header-announcement-bar-wrapper {
   justify-content: center;
 }
 
+/* With the "Flex" site animation type, Squarespace gives buttons (including
+   the off-screen skip link) position: relative, so in the flex row above the
+   skip link keeps its width and pushes the bar off-centre. */
+body.wm-floating-navbar-active #header .header-skip-link {
+  position: absolute;
+}
+
 body.wm-floating-navbar-active #header .header-inner {
   width: var(--wm-floating-navbar-width, 76vw);
   max-width: var(--wm-floating-navbar-max-width, var(--sqs-site-max-width, 1500px));
