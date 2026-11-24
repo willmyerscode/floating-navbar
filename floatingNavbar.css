@@ -131,6 +131,16 @@ body.wm-floating-navbar-active #header .header-inner {
   box-shadow: var(--wm-floating-navbar-shadow, 0 8px 32px hsla(var(--black-hsl, 0, 0%, 0%), 0.1));
 }
 
+/* Squarespace gives the title and nav a fixed 67% share that never shrinks,
+   sized for a full-width header. The bar is narrower, so on laptop-width
+   screens that share left too little room and the header actions (login,
+   language picker, button) spilled out past the bar's right edge. Letting it
+   shrink hands the room back, and the nav wraps as it already does natively. */
+body.wm-floating-navbar-active #header .header-display-desktop .header-title-nav-wrapper {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
 /* Dark and black header themes ship their own higher-specificity background,
    so the bar color is restated here to keep the same custom property winning. */
 body.wm-floating-navbar-active #header[data-section-theme*="dark"] .header-inner,
@@ -183,6 +193,22 @@ body.wm-floating-navbar-active #header .bottom-bun {
   background-color: var(--wm-floating-navbar-color, var(--solidHeaderNavigationColor, hsla(var(--black-hsl, 0, 0%, 7%), 1))) !important;
 }
 
+/* The language picker (Squarespace's own, also used for Weglot) shows the
+   current language as plain text in a div, and dropdown arrows (folders and
+   the language picker) are SVG strokes, so none of them are reached by the
+   link rules above. Without this they keep the adaptive header's color and
+   vanish against the bar over light sections. */
+body.wm-floating-navbar-active #header .header-inner .language-picker,
+body.wm-floating-navbar-active #header .header-inner .language-picker .current-language,
+body.wm-floating-navbar-active #header .header-inner .language-picker .current-language-name,
+body.wm-floating-navbar-active #header .header-inner .language-picker-content span {
+  color: var(--wm-floating-navbar-color, var(--solidHeaderNavigationColor, hsla(var(--black-hsl, 0, 0%, 7%), 1))) !important;
+}
+
+body.wm-floating-navbar-active #header .header-inner .header-dropdown-icon svg {
+  stroke: var(--wm-floating-navbar-color, var(--solidHeaderNavigationColor, hsla(var(--black-hsl, 0, 0%, 7%), 1))) !important;
+}
+
 /* ================================
    NATIVE HEADER CHROME
    The full-width background, border and drop shadow are hidden so only the
@@ -220,7 +246,11 @@ body.wm-floating-navbar-active #header .header-dropshadow {
    NAV FOLDER DROPDOWNS
    ================================ */
 
-body.wm-floating-navbar-active .header-nav-folder-content {
+/* The language picker's dropdown is styled like a folder, so it gets the same
+   background. Otherwise it follows the adaptive header and can turn white
+   under the bar's light text. */
+body.wm-floating-navbar-active .header-nav-folder-content,
+body.wm-floating-navbar-active #header .header-inner .language-picker-content {
   background: var(--wm-floating-navbar-folder-background, var(--solidHeaderBackgroundColor, hsla(var(--white-hsl, 0, 0%, 100%), 1))) !important;
   backdrop-filter: blur(var(--wm-floating-navbar-blur, 12px));
   -webkit-backdrop-filter: blur(var(--wm-floating-navbar-blur, 12px));
